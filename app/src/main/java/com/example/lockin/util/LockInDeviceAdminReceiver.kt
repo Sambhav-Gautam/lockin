@@ -16,7 +16,7 @@ class LockInDeviceAdminReceiver : DeviceAdminReceiver() {
         Toast.makeText(context, "Device Admin disabled", Toast.LENGTH_SHORT).show()
     }
 
-    override fun onDisableRequested(context: Context, intent: Intent): CharSequence? {
+    override fun onDisableRequested(context: Context, intent: Intent): CharSequence {
         // Start AdminPasswordActivity to prompt for password
         val passwordIntent = Intent(context, AdminPasswordActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK

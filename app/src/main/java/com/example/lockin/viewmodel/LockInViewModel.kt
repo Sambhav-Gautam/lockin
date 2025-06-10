@@ -4,13 +4,12 @@ import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.example.lockin.data.model.LockInUiState
 import com.example.lockin.data.preferences.EncryptedPrefsHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.util.*
+import java.util.Calendar
 
 class LockInViewModel(private val context: Context) : ViewModel() {
     private val _uiStateFlow = MutableStateFlow(LockInUiState())

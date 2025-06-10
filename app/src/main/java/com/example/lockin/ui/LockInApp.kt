@@ -1,6 +1,5 @@
 package com.example.lockin.ui
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lockin.viewmodel.LockInViewModel

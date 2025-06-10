@@ -31,7 +31,6 @@ class MainActivity : ComponentActivity() {
             Log.d("LockIn", "Accessibility service enabled")
             Toast.makeText(this, "Accessibility service enabled", Toast.LENGTH_SHORT).show()
             startService(Intent(this, AppBlockService::class.java))
-            // No need to redirect here; handled in AppBlockAccessibilityService
         } else {
             Log.w("LockIn", "Accessibility service not enabled")
             Toast.makeText(this, "Please enable accessibility service to block apps", Toast.LENGTH_LONG).show()
@@ -69,7 +68,7 @@ class MainActivity : ComponentActivity() {
             Log.d("LockIn", "Battery optimization disabled")
             Toast.makeText(this, "Battery optimization disabled", Toast.LENGTH_SHORT).show()
         } else {
-            Log.w("LockIn", "Battery optimization not disabled")
+            Log.w("Battery", "Battery optimization not disabled")
             Toast.makeText(this, "Please disable battery optimization for reliable performance", Toast.LENGTH_LONG).show()
         }
     }

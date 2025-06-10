@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LockIn</string>
+    <string name="accessibility_service_description">This service blocks selected apps to help you focus on your work or studies.</string>
+</resources>

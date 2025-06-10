@@ -33,14 +33,14 @@
 
         <!-- App Block Service -->
         <service
-            android:name=".AppBlockService"
+            android:name=".service.AppBlockService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
         <!-- Accessibility Service -->
         <service
-            android:name=".AppBlockAccessibilityService"
+            android:name=".service.AppBlockAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
             android:enabled="true"
             android:exported="false">

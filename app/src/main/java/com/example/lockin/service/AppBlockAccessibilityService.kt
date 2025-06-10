@@ -7,8 +7,8 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import android.widget.Toast
 import com.example.lockin.data.preferences.EncryptedPrefsHelper
+import com.example.lockin.ui.MotivatingImageActivity
 
 class AppBlockAccessibilityService : AccessibilityService() {
     private lateinit var encryptedPrefs: androidx.security.crypto.EncryptedSharedPreferences
@@ -36,12 +36,10 @@ class AppBlockAccessibilityService : AccessibilityService() {
             if (packageName in blockedApps && packageName != applicationContext.packageName) {
                 Log.d("LockIn", "Blocked app detected: $packageName")
                 mainHandler.post {
-                    Toast.makeText(applicationContext, "App Blocked: Please focus on your work or studies", Toast.LENGTH_SHORT).show()
-                    val homeIntent = Intent(Intent.ACTION_MAIN).apply {
-                        addCategory(Intent.CATEGORY_HOME)
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    val intent = Intent(this@AppBlockAccessibilityService, MotivatingImageActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                     }
-                    startActivity(homeIntent)
+                    startActivity(intent)
                 }
             }
         }

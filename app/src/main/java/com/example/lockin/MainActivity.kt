@@ -2,6 +2,7 @@ package com.example.lockin
 
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.AppOpsManager
+import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -21,6 +22,7 @@ import com.example.lockin.service.AppBlockService
 import com.example.lockin.service.AppBlockWorker
 import com.example.lockin.ui.LockInApp
 import com.example.lockin.ui.theme.LockinTheme
+import com.example.lockin.util.LockInDeviceAdminReceiver
 import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
@@ -48,6 +50,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val deviceAdminRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
+        val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val adminComponent = ComponentName(this, LockInDeviceAdminReceiver::class.java)
+        if (dpm.isAdminActive(adminComponent)) {
+            Log.d("LockIn", "Device admin enabled")
+            Toast.makeText(this, "Device admin enabled", Toast.LENGTH_SHORT).show()
+        } else {
+            Log.w("LockIn", "Device admin not enabled")
+            Toast.makeText(this, "Please enable device admin to lock screen", Toast.LENGTH_LONG).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -70,6 +84,17 @@ class MainActivity : ComponentActivity() {
             accessibilityPermissionRequest.launch(intent)
         } else {
             startService(Intent(this, AppBlockService::class.java))
+        }
+
+        // Request device admin permission
+        val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val adminComponent = ComponentName(this, LockInDeviceAdminReceiver::class.java)
+        if (!dpm.isAdminActive(adminComponent)) {
+            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
+                putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, adminComponent)
+                putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Enable device admin to lock the screen when blocked apps are accessed.")
+            }
+            deviceAdminRequest.launch(intent)
         }
 
         // Schedule work for app blocking

@@ -31,6 +31,11 @@
             </intent-filter>
         </activity>
 
+        <!-- Motivating Image Activity -->
+        <activity
+            android:name=".ui.MotivatingImageActivity"
+            android:exported="false" />
+
         <!-- App Block Service -->
         <service
             android:name=".service.AppBlockService"
@@ -60,5 +65,18 @@
             android:name="androidx.work.impl.background.systemjob.SystemJobService"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <!-- Device Admin Receiver -->
+        <receiver
+            android:name=".util.LockInDeviceAdminReceiver"
+            android:permission="android.permission.BIND_DEVICE_ADMIN"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

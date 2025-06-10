@@ -32,6 +32,32 @@ Replaces colorful icons with minimalist, grayscale versions for reduced app temp
 
 ---
 
+## Project Structure
+
+```
+com.example.lockin
+├── data
+│   ├── model
+│   │   ├── AppInfo.kt
+│   │   └── LockInUiState.kt
+│   └── preferences
+│       └── EncryptedPrefsHelper.kt
+├── service
+│   ├── AppBlockAccessibilityService.kt
+│   ├── AppBlockService.kt
+│   └── AppBlockWorker.kt
+├── ui
+│   ├── LockInApp.kt
+│   ├── MainScreen.kt
+│   └── AppPickerDialog.kt
+├── viewmodel
+│   ├── LockInViewModel.kt
+│   └── LockInViewModelFactory.kt
+└── MainActivity.kt
+```
+
+---
+
 ## Installation
 
 1. Clone the repository:
@@ -47,12 +73,12 @@ Replaces colorful icons with minimalist, grayscale versions for reduced app temp
 
 ## Roadmap
 
-* [x] Basic distraction blocking
-* [x] Browser whitelisting
-* [x] Affirmation alarm
-* [ ] Advanced tamper detection
-* [ ] Custom launcher with minimalist icons
-* [ ] Cloud sync for settings and affirmations
+* [x] Basic distraction blocking  
+* [x] Browser whitelisting  
+* [x] Affirmation alarm  
+* [ ] Advanced tamper detection  
+* [ ] Custom launcher with minimalist icons  
+* [ ] Cloud sync for settings and affirmations  
 
 ---
 

@@ -2,7 +2,6 @@ package com.example.lockin.service
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
-import android.content.ComponentName
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper

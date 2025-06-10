@@ -1,38 +1,117 @@
 package com.example.lockin.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.lockin.data.preferences.EncryptedPrefsHelper
 import com.example.lockin.viewmodel.LockInViewModel
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(viewModel: LockInViewModel) {
     val uiState by viewModel.uiStateFlow.collectAsState()
     var showAppPicker by remember { mutableStateOf(false) }
+    var showDisclaimer by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    // Check if disclaimer has been shown
+    LaunchedEffect(Unit) {
+        val encryptedPrefs = EncryptedPrefsHelper.getEncryptedPrefs(context)
+        val disclaimerShown = encryptedPrefs.getBoolean("disclaimer_shown", false)
+        if (!disclaimerShown) {
+            showDisclaimer = true
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(title = { Text("LockIn") })
-        }
+            TopAppBar(
+                title = {
+                    Text(
+                        "LockIn",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showAppPicker = true },
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
+            ) {
+                Text("Block Apps")
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Select Apps to Block", style = MaterialTheme.typography.titleMedium)
-            Button(onClick = { showAppPicker = true }) {
-                Text("Choose Apps")
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn() + scaleIn(initialScale = 0.95f)
+                ) {
+                    WelcomeCard()
+                }
             }
-            Text("Selected Apps: ${uiState.blockedApps.joinToString()}")
-            Text("Usage Stats", style = MaterialTheme.typography.titleMedium)
-            Text("Total time today: ${uiState.usageStats}")
+            item {
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn() + scaleIn(initialScale = 0.95f)
+                ) {
+                    BlockedAppsCard(uiState.blockedApps)
+                }
+            }
+            item {
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn() + scaleIn(initialScale = 0.95f)
+                ) {
+                    MostUsedAppsCard(uiState.mostUsedApps)
+                }
+            }
+            item {
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn() + scaleIn(initialScale = 0.95f)
+                ) {
+                    WeeklyProgressCard(uiState.weeklyBlockCounts)
+                }
+            }
+            item {
+                Spacer(modifier = Modifier.height(80.dp)) // Space for FAB
+            }
         }
     }
 
@@ -44,5 +123,220 @@ fun MainScreen(viewModel: LockInViewModel) {
             },
             onDismiss = { showAppPicker = false }
         )
+    }
+
+    if (showDisclaimer) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text("Important Disclaimer", style = MaterialTheme.typography.titleLarge) },
+            text = {
+                Text(
+                    "By using this app, you might not be able to access those distracting apps ever again in your life. LockIn is designed to help you stay focused by enforcing strict app blocking.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val encryptedPrefs = EncryptedPrefsHelper.getEncryptedPrefs(context)
+                            encryptedPrefs.edit().putBoolean("disclaimer_shown", true).apply()
+                            showDisclaimer = false
+                        }
+                    }
+                ) {
+                    Text("I Understand")
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            textContentColor = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+@Composable
+fun WelcomeCard() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp)),
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Welcome to LockIn",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "Stay focused and achieve your goals by blocking distractions.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+fun BlockedAppsCard(blockedApps: List<String>) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp)),
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                "Blocked Apps",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (blockedApps.isEmpty()) {
+                Text("No apps blocked yet.", style = MaterialTheme.typography.bodyMedium)
+            } else {
+                Text(
+                    blockedApps.joinToString(", "),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MostUsedAppsCard(mostUsedApps: List<Pair<String, Long>>) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp)),
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                "Most Used Apps (Last 24 Hours)",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (mostUsedApps.isEmpty()) {
+                Text("No usage data available.", style = MaterialTheme.typography.bodyMedium)
+            } else {
+                mostUsedApps.take(5).forEach { (appName, usageTime) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(appName, style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            formatUsageTime(usageTime),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WeeklyProgressCard(weeklyBlockCounts: List<Int>) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp)),
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                "Weekly Progress (Blocked Attempts)",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            SimpleBarChart(weeklyBlockCounts)
+        }
+    }
+}
+
+@Composable
+fun SimpleBarChart(data: List<Int>) {
+    val maxValue = data.maxOrNull()?.toFloat() ?: 1f
+    val barWidth = 32.dp
+    val barSpacing = 8.dp
+    val chartHeight = 100.dp
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(chartHeight)
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom
+    ) {
+        data.forEachIndexed { index, value ->
+            val barHeight = (value / maxValue * chartHeight.value).dp
+            Box(
+                modifier = Modifier
+                    .width(barWidth)
+                    .height(barHeight)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            if (index < data.size - 1) {
+                Spacer(modifier = Modifier.width(barSpacing))
+            }
+        }
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+        days.forEach { day ->
+            Text(
+                text = day,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.width(barWidth)
+            )
+        }
+    }
+}
+
+fun formatUsageTime(seconds: Long): String {
+    val hours = seconds / 3600
+    val minutes = (seconds % 3600) / 60
+    return when {
+        hours > 0 -> "${hours}h ${minutes}m"
+        minutes > 0 -> "${minutes}m"
+        else -> "<1m"
     }
 }

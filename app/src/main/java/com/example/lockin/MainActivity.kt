@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
             Log.d("LockIn", "Accessibility service enabled")
             Toast.makeText(this, "Accessibility service enabled", Toast.LENGTH_SHORT).show()
             startService(Intent(this, AppBlockService::class.java))
+            // No need to redirect here; handled in AppBlockAccessibilityService
         } else {
             Log.w("LockIn", "Accessibility service not enabled")
             Toast.makeText(this, "Please enable accessibility service to block apps", Toast.LENGTH_LONG).show()
@@ -59,6 +60,17 @@ class MainActivity : ComponentActivity() {
         } else {
             Log.w("LockIn", "Device admin not enabled")
             Toast.makeText(this, "Please enable device admin to lock screen", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private val batteryOptimizationRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
+        val powerManager = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+        if (powerManager.isIgnoringBatteryOptimizations(packageName)) {
+            Log.d("LockIn", "Battery optimization disabled")
+            Toast.makeText(this, "Battery optimization disabled", Toast.LENGTH_SHORT).show()
+        } else {
+            Log.w("LockIn", "Battery optimization not disabled")
+            Toast.makeText(this, "Please disable battery optimization for reliable performance", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -92,21 +104,30 @@ class MainActivity : ComponentActivity() {
         if (!dpm.isAdminActive(adminComponent)) {
             val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
                 putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, adminComponent)
-                putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Enable device admin to lock the screen when blocked apps are accessed.")
+                putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Enable device admin to lock the screen and protect the app.")
             }
             deviceAdminRequest.launch(intent)
         }
 
-        // Schedule work for app blocking
-        val workRequest = PeriodicWorkRequestBuilder<AppBlockWorker>(15, TimeUnit.MINUTES)
-            .build()
-        WorkManager.getInstance(this).enqueue(workRequest)
+        // Request battery optimization exemption
+        val powerManager = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+        if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                data = android.net.Uri.parse("package:$packageName")
+            }
+            batteryOptimizationRequest.launch(intent)
+        }
 
         setContent {
             LockinTheme {
                 LockInApp()
             }
         }
+
+        // Schedule work for app blocking
+        val workRequest = PeriodicWorkRequestBuilder<AppBlockWorker>(15, TimeUnit.MINUTES)
+            .build()
+        WorkManager.getInstance(this).enqueue(workRequest)
     }
 
     private fun isAccessibilityServiceEnabled(): Boolean {

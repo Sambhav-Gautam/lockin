@@ -18,17 +18,8 @@
 ✅ **Distraction Blocking**  
 Blocks distracting apps permanently with a secure, tamper-resistant password salt.
 
-✅ **Pornographic Content Filtering**  
-Allows only whitelisted browsers like Spin, ensuring a safe browsing experience.
-
-✅ **Alarm with Affirmation Requirement**  
-Alarm that keeps ringing until you type a powerful, long affirmation text to start your day right.
-
 ✅ **Monochrome Grayscale Mode**  
 Turns your screen grayscale to reduce visual stimulation and improve focus.
-
-✅ **Minimalist App Icons**  
-Replaces colorful icons with minimalist, grayscale versions for reduced app temptation.
 
 ---
 

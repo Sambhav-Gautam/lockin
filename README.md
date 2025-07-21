@@ -9,7 +9,7 @@
 
 ![LockIn](https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif)
 
-> **LockIn** is an unbreakable self-discipline app for Android, designed to block distractions, ban pornographic content, and cultivate life-changing habits.
+> **LockIn** is an unbreakable self-discipline app for Android, designed to block distractions and cultivate life-changing habits.
 
 ---
 
@@ -53,7 +53,7 @@ com.example.lockin
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/lockin.git
+   git clone https://github.com/Sambhav-Gautam/lockin.git
    ```
 2. Open the project in Android Studio.
 3. Build and run on your device.
@@ -66,8 +66,8 @@ com.example.lockin
 
 * [x] Basic distraction blocking  
 * [x] Browser whitelisting  
-* [x] Affirmation alarm  
-* [ ] Advanced tamper detection  
+* [ ] Affirmation alarm  
+* [x] Advanced tamper detection  
 * [ ] Custom launcher with minimalist icons  
 * [ ] Cloud sync for settings and affirmations  
 
@@ -86,7 +86,4 @@ This project is licensed under the [MIT License](LICENSE).
 ---
 
 > “Transform your life by removing distractions and building habits that last.”
-
-![Focus](https://media.giphy.com/media/l0MYEqEzwMWFCg8rm/giphy.gif)
-
 ---
